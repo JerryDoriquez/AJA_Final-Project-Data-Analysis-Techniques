@@ -13,7 +13,6 @@ st.set_page_config(page_title="Titanic Data Analysis", layout="wide")
 # Function to load data
 @st.cache_data
 def load_data():
-    
     url = "https://raw.githubusercontent.com/JerryDoriquez/AJA_Final-Project-Data-Analysis-Techniques/refs/heads/main/titanic_dataset.csv"  
     data = pd.read_csv(url)
     return data
@@ -53,8 +52,10 @@ elif options == 'Data Exploration':
     st.write("Checking for missing values:")
     st.write(data.isnull().sum())
     
-    st.write("**Filling missing values in 'Age' with median and dropping rows with missing 'Embarked':**")
+    # Handling missing values
+    st.write("**Filling missing values in 'Age' and 'Fare', and dropping rows with missing 'Embarked':**")
     data['Age'].fillna(data['Age'].median(), inplace=True)
+    data['Fare'].fillna(data['Fare'].median(), inplace=True)
     data.dropna(subset=['Embarked'], inplace=True)
     st.write("Missing values after cleaning:")
     st.write(data.isnull().sum())
@@ -75,6 +76,8 @@ elif options == 'Clustering Analysis':
     st.title("Clustering Analysis")
     st.subheader("Feature Preparation")
     st.write("Encoding categorical variables and scaling numeric features for clustering.")
+    
+    # Encoding categorical variables
     data['Sex'] = data['Sex'].map({'male': 0, 'female': 1})
     features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
     scaler = StandardScaler()
@@ -126,5 +129,5 @@ elif options == 'Conclusions':
     """)
 
     st.sidebar.markdown("---")
-    st.sidebar.markdown("**Developed by:** Your Name")
+    st.sidebar.markdown("**Developed by:** AJA ")
     st.sidebar.markdown("**Project:** Titanic Data Analysis")
