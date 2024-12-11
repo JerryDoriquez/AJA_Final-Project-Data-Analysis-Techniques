@@ -10,6 +10,29 @@ from sklearn.preprocessing import StandardScaler
 # Set Streamlit page configuration
 st.set_page_config(page_title="Titanic Advanced Insights", layout="wide", initial_sidebar_state="expanded")
 
+# Custom styles
+st.markdown("""
+    <style>
+        .title {
+            color: #1f77b4; 
+            font-size: 36px; 
+            font-weight: bold;
+        }
+        .subheader {
+            color: #ff7f0e; 
+            font-size: 28px; 
+            font-weight: bold;
+        }
+        .insight {
+            background-color: #d1ecf1; 
+            padding: 10px; 
+            border-radius: 5px; 
+            border-left: 5px solid #0c5460;
+            color: #0c5460;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Function to load data
 @st.cache_data
 def load_data():
@@ -21,7 +44,6 @@ def load_data():
 data = load_data()
 
 # Sidebar for navigation
-st.sidebar.image("https://upload.wikimedia.org/wikipedia/commons/e/e4/Titanic_survivors.jpg", width=300)
 st.sidebar.title("Navigation")
 options = st.sidebar.radio("Go to:", ['Overview', 'Family Dynamics Analysis', 'Fare Analysis', 'Conclusions'])
 st.sidebar.markdown("---")
@@ -30,16 +52,15 @@ st.sidebar.markdown("**Project:** Titanic Advanced Insights")
 
 # Overview Section
 if options == 'Overview':
-    st.title("Titanic Dataset Advanced Insights")
+    st.markdown('<div class="title">Titanic Dataset Advanced Insights</div>', unsafe_allow_html=True)
     st.write("""
     This application dives deeper into the Titanic dataset, focusing on family dynamics, fare analysis, and how these factors influenced passenger groups.
     """)
-    st.image("https://upload.wikimedia.org/wikipedia/commons/6/6e/Titanic_-_OP-10527.jpg", caption="RMS Titanic", use_column_width=True)
-    st.subheader("Dataset Structure")
-    st.write("**Sample Data**")
+    st.image(r"C:\Users\corbe\AJA_Final-Project-Data-Analysis-Techniques\Titanic.jpg", caption="RMS Titanic", use_column_width=True)
+    st.markdown('<div class="subheader">Dataset Structure</div>', unsafe_allow_html=True)
     st.dataframe(data.head())
 
-    st.subheader("Column Descriptions")
+    st.markdown('<div class="subheader">Column Descriptions</div>', unsafe_allow_html=True)
     st.write("""
     - **Survived**: Survival (0 = No, 1 = Yes)
     - **Pclass**: Passenger class (1 = First, 2 = Second, 3 = Third)
@@ -52,8 +73,8 @@ if options == 'Overview':
 
 # Family Dynamics Analysis Section
 elif options == 'Family Dynamics Analysis':
-    st.title("Family Dynamics and Survival Analysis")
-    st.subheader("Family Size and Survival")
+    st.markdown('<div class="title">Family Dynamics and Survival Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subheader">Family Size and Survival</div>', unsafe_allow_html=True)
 
     # Create a family size feature
     data['FamilySize'] = data['SibSp'] + data['Parch'] + 1
@@ -62,12 +83,13 @@ elif options == 'Family Dynamics Analysis':
     st.write("Distribution of family size:")
     st.write(data['FamilySize'].value_counts().sort_index())
 
+    sns.set_palette("coolwarm")
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.histplot(data, x='FamilySize', hue='Survived', multiple='stack', kde=False, ax=ax)
     ax.set_title("Survival Based on Family Size")
     st.pyplot(fig)
 
-    st.subheader("Key Insights:")
+    st.markdown('<div class="insight">Key Insights:</div>', unsafe_allow_html=True)
     st.write("""
     - Passengers with smaller families (1-3 members) had higher survival rates.
     - Larger families faced lower survival rates, likely due to difficulty managing larger groups during evacuation.
@@ -75,16 +97,17 @@ elif options == 'Family Dynamics Analysis':
 
 # Fare Analysis Section
 elif options == 'Fare Analysis':
-    st.title("Fare Distribution and Clustering Analysis")
+    st.markdown('<div class="title">Fare Distribution and Clustering Analysis</div>', unsafe_allow_html=True)
 
-    st.subheader("Fare Distribution")
+    st.markdown('<div class="subheader">Fare Distribution</div>', unsafe_allow_html=True)
     st.write("Examining the distribution of ticket fares among passengers:")
+    sns.set_palette("Blues")
     fig, ax = plt.subplots(figsize=(10, 5))
     sns.histplot(data['Fare'], bins=20, kde=True, ax=ax)
     ax.set_title("Distribution of Fares")
     st.pyplot(fig)
 
-    st.subheader("Clustering Passengers by Fare")
+    st.markdown('<div class="subheader">Clustering Passengers by Fare</div>', unsafe_allow_html=True)
     st.write("Grouping passengers based on ticket fare and passenger class using K-means clustering.")
 
     # Feature selection
@@ -114,10 +137,11 @@ elif options == 'Fare Analysis':
     kmeans = KMeans(n_clusters=optimal_k, random_state=42)
     data['FareCluster'] = kmeans.fit_predict(scaled_fare_features)
 
-    st.subheader("Clustered Data Sample")
-    st.write(data[['Fare', 'Pclass', 'FareCluster']].head())
+    st.markdown('<div class="subheader">Clustered Data Sample</div>', unsafe_allow_html=True)
+    st.dataframe(data[['Fare', 'Pclass', 'FareCluster']].head())
 
     # Visualization of clusters
+    sns.set_palette("Set2")
     pca = PCA(n_components=2)
     principal_components = pca.fit_transform(scaled_fare_features)
     pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
@@ -129,7 +153,7 @@ elif options == 'Fare Analysis':
 
 # Conclusions Section
 elif options == 'Conclusions':
-    st.title("Conclusions and Recommendations")
+    st.markdown('<div class="title">Conclusions and Recommendations</div>', unsafe_allow_html=True)
     st.write("""
     **Key Takeaways:**
     - Family size significantly influenced survival rates, with smaller families having better outcomes.
