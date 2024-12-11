@@ -8,12 +8,35 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 
 # Set Streamlit page configuration
-st.set_page_config(page_title="Titanic Data Analysis", layout="wide")
+st.set_page_config(page_title="Titanic Advanced Insights", layout="wide", initial_sidebar_state="expanded")
+
+# Custom styles
+st.markdown("""
+    <style>
+        .title {
+            color: #1f77b4; 
+            font-size: 36px; 
+            font-weight: bold;
+        }
+        .subheader {
+            color: #ff7f0e; 
+            font-size: 28px; 
+            font-weight: bold;
+        }
+        .insight {
+            background-color: #d1ecf1; 
+            padding: 10px; 
+            border-radius: 5px; 
+            border-left: 5px solid #0c5460;
+            color: #0c5460;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 # Function to load data
 @st.cache_data
 def load_data():
-    url = "https://raw.githubusercontent.com/JerryDoriquez/AJA_Final-Project-Data-Analysis-Techniques/refs/heads/main/titanic_dataset.csv"  
+    url = "https://raw.githubusercontent.com/JerryDoriquez/AJA_Final-Project-Data-Analysis-Techniques/refs/heads/main/titanic_dataset.csv"
     data = pd.read_csv(url)
     return data
 
@@ -22,19 +45,22 @@ data = load_data()
 
 # Sidebar for navigation
 st.sidebar.title("Navigation")
-options = st.sidebar.radio("Go to:", ['Overview', 'Data Exploration', 'Clustering Analysis', 'Conclusions'])
+options = st.sidebar.radio("Go to:", ['Overview', 'Family Dynamics Analysis', 'Fare Analysis', 'Conclusions'])
+st.sidebar.markdown("---")
+st.sidebar.markdown("**Developed by:** AJA Team")
+st.sidebar.markdown("**Project:** Titanic Advanced Insights")
 
 # Overview Section
 if options == 'Overview':
-    st.title("Titanic Dataset Analysis")
+    st.markdown('<div class="title">Titanic Dataset Advanced Insights</div>', unsafe_allow_html=True)
     st.write("""
-    This application analyzes the Titanic dataset, focusing on clustering passengers based on their survival, demographics, and other features using the K-means algorithm.
+    This application dives deeper into the Titanic dataset, focusing on family dynamics, fare analysis, and how these factors influenced passenger groups.
     """)
-    st.subheader("Dataset Structure")
-    st.write("**Sample Data**")
-    st.write(data.head())
+    st.image("Titanic.jpg", caption="RMS Titanic", use_column_width=True)
+    st.markdown('<div class="subheader">Dataset Structure</div>', unsafe_allow_html=True)
+    st.dataframe(data.head())
 
-    st.subheader("Column Descriptions")
+    st.markdown('<div class="subheader">Column Descriptions</div>', unsafe_allow_html=True)
     st.write("""
     - **Survived**: Survival (0 = No, 1 = Yes)
     - **Pclass**: Passenger class (1 = First, 2 = Second, 3 = Third)
@@ -45,51 +71,58 @@ if options == 'Overview':
     - **Fare**: Passenger fare
     """)
 
-# Data Exploration and Preparation Section
-elif options == 'Data Exploration':
-    st.title("Data Exploration and Preparation")
-    st.subheader("Handling Missing Values")
-    st.write("Checking for missing values:")
-    st.write(data.isnull().sum())
-    
-    # Handling missing values
-    st.write("**Filling missing values in 'Age' and 'Fare', and dropping rows with missing 'Embarked':**")
-    data['Age'].fillna(data['Age'].median(), inplace=True)
-    data['Fare'].fillna(data['Fare'].median(), inplace=True)
-    data.dropna(subset=['Embarked'], inplace=True)
-    st.write("Missing values after cleaning:")
-    st.write(data.isnull().sum())
+# Family Dynamics Analysis Section
+elif options == 'Family Dynamics Analysis':
+    st.markdown('<div class="title">Family Dynamics and Survival Analysis</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subheader">Family Size and Survival</div>', unsafe_allow_html=True)
 
-    st.subheader("Descriptive Statistics")
-    st.write(data.describe())
+    # Create a family size feature
+    data['FamilySize'] = data['SibSp'] + data['Parch'] + 1
 
-    st.subheader("Data Distribution")
-    fig, ax = plt.subplots(1, 2, figsize=(15, 5))
-    sns.countplot(x='Pclass', hue='Survived', data=data, ax=ax[0])
-    ax[0].set_title('Survival by Class')
-    sns.histplot(data['Age'], bins=10, kde=True, ax=ax[1])
-    ax[1].set_title('Age Distribution')
+    st.write("We created a new feature, **FamilySize**, which represents the total number of family members aboard.")
+    st.write("Distribution of family size:")
+    st.write(data['FamilySize'].value_counts().sort_index())
+
+    sns.set_palette("coolwarm")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.histplot(data, x='FamilySize', hue='Survived', multiple='stack', kde=False, ax=ax)
+    ax.set_title("Survival Based on Family Size")
     st.pyplot(fig)
 
-# Clustering Analysis Section
-elif options == 'Clustering Analysis':
-    st.title("Clustering Analysis")
-    st.subheader("Feature Preparation")
-    st.write("Encoding categorical variables and scaling numeric features for clustering.")
-    
-    # Encoding categorical variables
-    data['Sex'] = data['Sex'].map({'male': 0, 'female': 1})
-    features = ['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare']
-    scaler = StandardScaler()
-    scaled_features = scaler.fit_transform(data[features])
+    st.markdown('<div class="insight">Key Insights:</div>', unsafe_allow_html=True)
+    st.write("""
+    - Passengers with smaller families (1-3 members) had higher survival rates.
+    - Larger families faced lower survival rates, likely due to difficulty managing larger groups during evacuation.
+    """)
 
-    st.subheader("Determining Optimal Number of Clusters")
+# Fare Analysis Section
+elif options == 'Fare Analysis':
+    st.markdown('<div class="title">Fare Distribution and Clustering Analysis</div>', unsafe_allow_html=True)
+
+    st.markdown('<div class="subheader">Fare Distribution</div>', unsafe_allow_html=True)
+    st.write("Examining the distribution of ticket fares among passengers:")
+    sns.set_palette("Blues")
+    fig, ax = plt.subplots(figsize=(10, 5))
+    sns.histplot(data['Fare'], bins=20, kde=True, ax=ax)
+    ax.set_title("Distribution of Fares")
+    st.pyplot(fig)
+
+    st.markdown('<div class="subheader">Clustering Passengers by Fare</div>', unsafe_allow_html=True)
+    st.write("Grouping passengers based on ticket fare and passenger class using K-means clustering.")
+
+    # Feature selection
+    fare_features = ['Fare', 'Pclass']
+    scaler = StandardScaler()
+    scaled_fare_features = scaler.fit_transform(data[fare_features])
+
+    # Determine optimal number of clusters
     inertia = []
-    K = range(1, 11)
+    K = range(1, 6)
     for k in K:
         kmeans = KMeans(n_clusters=k, random_state=42)
-        kmeans.fit(scaled_features)
+        kmeans.fit(scaled_fare_features)
         inertia.append(kmeans.inertia_)
+
     fig, ax = plt.subplots()
     ax.plot(K, inertia, 'bo-')
     ax.set_xlabel('Number of clusters')
@@ -97,37 +130,39 @@ elif options == 'Clustering Analysis':
     ax.set_title('Elbow Method For Optimal k')
     st.pyplot(fig)
 
-    st.subheader("Applying K-means Clustering")
-    optimal_k = st.slider('Select the number of clusters', 2, 10, 3)
-    kmeans = KMeans(n_clusters=optimal_k, random_state=42)
-    clusters = kmeans.fit_predict(scaled_features)
-    data['Cluster'] = clusters
-    st.write(data[['Pclass', 'Sex', 'Age', 'SibSp', 'Parch', 'Fare', 'Cluster']].head())
+    st.write("The optimal number of clusters is selected using the Elbow Method. Adjust the slider below to experiment with different cluster counts.")
+    optimal_k = st.slider('Select the number of clusters for Fare Analysis', 2, 5, 3)
 
-    st.subheader("Cluster Visualization")
+    # Apply K-means clustering
+    kmeans = KMeans(n_clusters=optimal_k, random_state=42)
+    data['FareCluster'] = kmeans.fit_predict(scaled_fare_features)
+
+    st.markdown('<div class="subheader">Clustered Data Sample</div>', unsafe_allow_html=True)
+    st.dataframe(data[['Fare', 'Pclass', 'FareCluster']].head())
+
+    # Visualization of clusters
+    sns.set_palette("Set2")
     pca = PCA(n_components=2)
-    principal_components = pca.fit_transform(scaled_features)
-    principal_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
-    principal_df['Cluster'] = clusters
+    principal_components = pca.fit_transform(scaled_fare_features)
+    pca_df = pd.DataFrame(data=principal_components, columns=['PC1', 'PC2'])
+    pca_df['FareCluster'] = data['FareCluster']
     fig, ax = plt.subplots()
-    sns.scatterplot(data=principal_df, x='PC1', y='PC2', hue='Cluster', palette='tab10', ax=ax)
-    ax.set_title('Clusters Visualization (PCA)')
+    sns.scatterplot(data=pca_df, x='PC1', y='PC2', hue='FareCluster', palette='tab10', ax=ax)
+    ax.set_title('Fare Clusters Visualization (PCA)')
     st.pyplot(fig)
 
 # Conclusions Section
 elif options == 'Conclusions':
-    st.title("Conclusions and Recommendations")
+    st.markdown('<div class="title">Conclusions and Recommendations</div>', unsafe_allow_html=True)
     st.write("""
     **Key Takeaways:**
-    - Passengers are grouped into clusters based on demographic and survival-related features.
-    - Clustering reveals patterns, such as certain clusters having higher survival rates.
-    - These insights can aid in understanding the characteristics of passengers who survived or perished.
+    - Family size significantly influenced survival rates, with smaller families having better outcomes.
+    - Fares varied widely across passenger classes, and clustering revealed distinct groups based on economic status.
 
     **Actionable Recommendations:**
-    - Apply similar clustering techniques to other historical datasets to uncover patterns.
-    - Explore additional data preprocessing steps, such as handling outliers or feature engineering.
+    - Further analyze the relationship between family dynamics and survival strategies.
+    - Investigate fare clusters in relation to boarding locations and other socio-economic factors.
     """)
 
+    st.balloons()
     st.sidebar.markdown("---")
-    st.sidebar.markdown("**Developed by:** AJA ")
-    st.sidebar.markdown("**Project:** Titanic Data Analysis")
